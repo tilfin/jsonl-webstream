@@ -1,0 +1,42 @@
+{
+  "name": "jsonl-webstream",
+  "version": "0.3.0",
+  "description": "Lightweight library for JSON Lines web stream between browsers and Node.js environments",
+  "author": "Toshimitsu Takahashi",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "module": "./dist/index.js",
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "ts:check": "tsc --noEmit",
+    "build": "tsc --project tsconfig.build.json",
+    "check": "biome check --write ./src ./test *.json",
+    "test": "vitest run"
+  },
+  "keywords": ["jsonl", "jsonlines", "webstream", "stream"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tilfin/jsonl-webstream.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tilfin/jsonl-webstream/issues"
+  },
+  "homepage": "https://github.com/tilfin/jsonl-webstream#readme",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/web": "^0.0.208",
+    "fastify": "^5.2.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}
