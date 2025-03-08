@@ -18,7 +18,8 @@
   "scripts": {
     "ts:check": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json",
-    "check": "biome check --write ./src ./test *.json",
+    "check": "biome check ./src ./test *.json",
+    "fix": "biome check --write ./src ./test *.json",
     "test": "vitest run"
   },
   "keywords": ["jsonl", "jsonlines", "webstream", "stream"],
