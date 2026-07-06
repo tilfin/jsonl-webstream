@@ -7,12 +7,15 @@ class JsonLineScanner<T> {
   ) {}
 
   append(buffer: string): void {
+    let searchStart = this.#fragment.length;
     this.#fragment += buffer;
-    while (this.#scan());
+    while (this.#scan(searchStart)) {
+      searchStart = 0;
+    }
   }
 
-  #scan(): boolean {
-    const lfPos = this.#fragment.indexOf("\n");
+  #scan(searchStart: number): boolean {
+    const lfPos = this.#fragment.indexOf("\n", searchStart);
     if (lfPos === -1) return false;
 
     const json = this.#fragment.substring(0, lfPos);
