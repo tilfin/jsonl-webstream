@@ -9,14 +9,23 @@ type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue } | { 
 export interface JsonLinesWriter {
   /**
    * Writes a JSON value to the stream.
+   * Calls made after the stream is closed or cancelled are ignored.
    * @param data The JSON data to write
    */
   write(data: JsonValue): void;
 
   /**
    * Closes the stream normally, indicating successful completion.
+   * Repeated calls and calls made after cancellation are ignored.
    */
   close(): void;
+
+  /**
+   * Aborts the stream, indicating abnormal completion.
+   * Repeated calls and calls made after closing or cancellation are ignored.
+   * @param reason The reason for aborting the stream
+   */
+  abort(reason?: unknown): void;
 
   /**
    * Registers a callback to be called when the stream is cancelled.
@@ -27,19 +36,29 @@ export interface JsonLinesWriter {
 
 class JsonLinesWriterImpl implements JsonLinesWriter {
   onWrite?: (data: JsonValue) => void;
-  onComplete?: (err?: Error) => void;
+  onComplete?: () => void;
+  onAbort?: (reason?: unknown) => void;
+  #state: "open" | "closed" | "aborted" | "cancelled" = "open";
   #onCancel?: () => void;
 
   write(data: JsonValue): void {
-    if (this.onWrite) {
-      this.onWrite(data);
-    }
+    if (this.#state !== "open") return;
+
+    this.onWrite?.(data);
   }
 
-  close(err?: Error): void {
-    if (this.onComplete) {
-      this.onComplete(err);
-    }
+  close(): void {
+    if (this.#state !== "open") return;
+
+    this.#state = "closed";
+    this.onComplete?.();
+  }
+
+  abort(reason?: unknown): void {
+    if (this.#state !== "open") return;
+
+    this.#state = "aborted";
+    this.onAbort?.(reason);
   }
 
   onCancel(callback: () => void): void {
@@ -47,9 +66,10 @@ class JsonLinesWriterImpl implements JsonLinesWriter {
   }
 
   cancel(): void {
-    if (this.#onCancel) {
-      this.#onCancel();
-    }
+    if (this.#state !== "open") return;
+
+    this.#state = "cancelled";
+    this.#onCancel?.();
   }
 }
 
@@ -91,6 +111,9 @@ export function createJsonLinesSender(): {
       };
       writer.onComplete = () => {
         controller.close();
+      };
+      writer.onAbort = (reason) => {
+        controller.error(reason);
       };
     },
     cancel() {
