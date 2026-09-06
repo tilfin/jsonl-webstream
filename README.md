@@ -89,6 +89,7 @@ Creates a paired ReadableStream and writer for JSON Lines streaming.
 Interface for writing JSON Lines data to a stream.
 
 - **Methods:**
-  - `write(data: JsonValue): void` - Writes a JSON value to the stream
-  - `close(): void` - Closes the stream normally
+  - `write(data: JsonValue): void` - Writes a JSON value to the stream. Calls after closing or cancellation are ignored
+  - `close(): void` - Closes the stream normally. Repeated calls and calls after cancellation are ignored
+  - `abort(reason?: unknown): void` - Aborts the stream with an error. Repeated calls and calls after completion or cancellation are ignored
   - `onCancel(callback: () => void): void` - Registers a callback for stream cancellation
